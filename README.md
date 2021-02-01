@@ -2,6 +2,22 @@
 
 This repository provides an entry point and set of shared tasks for testing and CI.  It allows any provided task to be easily overridden.  Currently this is for use with Python.
 
+## Installation
+
+To install this library, use pip directly or add this to the requirements-test.txt file.
+
+```shell
+# Example install from pip
+python -m pip install git+https://github.com/anchore/test-infra.git@v0.0.1
+
+# Example of installing via pip and a requirements file
+# contents of requirements-test.txt
+git+https://github.com/anchore/test-infra.git@v0.0.1#egg=test-infra
+
+# install requirements via pip
+python -m pip install -r requirements-test.txt
+```
+
 ## Usage Example
 
 To use the provided task `clean`, clone this repo into your project's root directory, and create the following variables and targets in your makefile:
@@ -9,25 +25,15 @@ To use the provided task `clean`, clone this repo into your project's root direc
 ```
 TEST_IMAGE_NAME := my_image:latest
 TEST_HARNESS_REPO := https://github.com/anchore/test-infra.git
-CI_CMD := anchore-ci/ci_harness
+CI_CMD := ci_harness
 
-anchore-ci: ## Fetch test artifacts for the CI harness
-  rm -rf /tmp/test-infra; git clone $(TEST_HARNESS_REPO) /tmp/test-infra
-  mv ./anchore-ci ./anchore-ci-`date +%F-%H-%M-%S`; mv /tmp/test-infra/anchore-ci .
 
 .PHONY: clean
-clean: anchore-ci ## Clean up the project directory and delete dev image
+clean: ## Clean up the project directory and delete dev image
   @$(CI_CMD) clean $(TEST_IMAGE_NAME)
 ```
 
 To override the provided task with your own `clean`, provide an executable in `./scripts/ci/clean`, and the test harness entry point will invoke your task instead.
-
-Add the following to your .gitignore file so you don't pull in the test harness artifacts (unless you want to):
-
-```
-# CI scripts
-anchore-ci*/
-```
 
 The following tasks are provided (run `./anchore-ci/ci_harness` to see a current list in case this has changed):
 
